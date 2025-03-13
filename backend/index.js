@@ -14,17 +14,17 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 
 dotenv.config();
+
 const port = process.env.PORT || 5001;
 
 connectDB();
 
 const app = express();
 
-const allowedOrigins = ['https://techhive-ecommerce-platform.onrender.com'];
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+const allowedOrigins = [
+	'https://techhive-ecommerce-platform.onrender.com',
+	'http://localhost:5173',
+];
 
 app.use(
 	cors({
@@ -33,6 +33,12 @@ app.use(
 		credentials: true,
 	})
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/products', productRoutes);
@@ -43,8 +49,9 @@ app.get('/api/config/paypal', (req, res) => {
 	res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
 
+// Serve uploaded images
 const __dirname = path.resolve();
 // Set up static file serving for the uploads folder
-app.use('/uploads', express.static(path.join(__dirname + '/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'backend/uploads')));
 
 app.listen(port, () => console.log(`server running on port ${port}`));

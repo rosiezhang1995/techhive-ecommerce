@@ -36,7 +36,7 @@ const AllProducts = () => {
 									<div className="flex">
 										{/* Image */}
 										<img
-											src={product.image}
+											src={`${import.meta.env.VITE_API_URL}${product.image}`}
 											alt={product.name}
 											className="w-[10rem] object-cover"
 										/>

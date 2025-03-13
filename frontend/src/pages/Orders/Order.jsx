@@ -116,7 +116,7 @@ const Order = () => {
 											<td className="p-2">
 												<div className="flex justify-center items-center">
 													<img
-														src={item.image}
+														src={`${import.meta.env.VITE_API_URL}${item.image}`}
 														alt={item.name}
 														className="w-16 h-16 object-cover rounded"
 													/>

@@ -8,10 +8,7 @@ import {
 } from '../../redux/api/productApiSlice';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
-import {
-	FaBox,
-	FaStore,
-} from 'react-icons/fa';
+import { FaBox, FaStore } from 'react-icons/fa';
 import HeartIcon from './HeartIcon';
 import Ratings from './Ratings';
 import ProductTabs from './ProductTabs';
@@ -81,7 +78,7 @@ const ProductDetails = () => {
 					<div className="flex flex-row relative items-between mt-8 ml-[10rem]">
 						<div className="relative">
 							<img
-								src={product.image}
+								src={`${import.meta.env.VITE_API_URL}${product.image}`}
 								alt={product.name}
 								className="w-full h-full object-cover xl:w-[50rem] lg:w-[45rem] md:w-[30rem] sm:w-[20rem]"
 							/>
@@ -90,35 +87,38 @@ const ProductDetails = () => {
 						</div>
 
 						<div className="ml-[2rem] w-full xl:w-[35rem] lg:w-[35rem] md:w-[30rem]">
-							<h2 className="text-2xl flex-wrap font-semibold">{product.name}</h2>
-							<p className="my-4 text-[#B0B0B0]">
-								{product.description}
-							</p>
+							<h2 className="text-2xl flex-wrap font-semibold">
+								{product.name}
+							</h2>
+							<p className="my-4 text-[#B0B0B0]">{product.description}</p>
 
 							<p className="text-5xl my-4 font-extrabold">$ {product.price}</p>
 
 							<div className="w-[20rem]">
-									<h1 className="flex items-center mb-6">
-										<FaStore className="mr-2 text-white" /> Brand:{' '}
-										{product.brand}
-									</h1>
-                  <h1 className="flex items-center mb-6 w-[10rem]">
-                    <FaBox className="mr-2 text-white" /> In Stock:{" "}
-                    {product.countInStock}
-                  </h1>
+								<h1 className="flex items-center mb-6">
+									<FaStore className="mr-2 text-white" /> Brand: {product.brand}
+								</h1>
+								<h1 className="flex items-center mb-6 w-[10rem]">
+									<FaBox className="mr-2 text-white" /> In Stock:{' '}
+									{product.countInStock}
+								</h1>
 							</div>
 
 							<div className="mb-6">
 								<Ratings
 									value={product.rating}
-									text={`${product.numReviews} ${product.numReviews <= 1 ? "review" : "reviews"}`}
+									text={`${product.numReviews} ${
+										product.numReviews <= 1 ? 'review' : 'reviews'
+									}`}
 								/>
 							</div>
 
-              <div className="mb-6">
-              {product.countInStock > 0 && (
+							<div className="mb-6">
+								{product.countInStock > 0 && (
 									<div>
-                    <label className="block mb-2 text-white">Select quantity</label>
+										<label className="block mb-2 text-white">
+											Select quantity
+										</label>
 										<select
 											value={qty}
 											onChange={(e) => setQty(Number(e.target.value))}
@@ -132,7 +132,7 @@ const ProductDetails = () => {
 										</select>
 									</div>
 								)}
-              </div>
+							</div>
 
 							<div className="btn-container">
 								<button
@@ -146,17 +146,17 @@ const ProductDetails = () => {
 						</div>
 					</div>
 
-          <div className="mt-[5rem] ml-[10rem] container flex flex-wrap items-start justify-between">
-							<ProductTabs
-								loadingProductReview={loadingProductReview}
-								userInfo={userInfo}
-								submitHandler={submitHandler}
-								rating={rating}
-								setRating={setRating}
-								comment={comment}
-								setComment={setComment}
-								product={product}
-							/>
+					<div className="mt-[5rem] ml-[10rem] container flex flex-wrap items-start justify-between">
+						<ProductTabs
+							loadingProductReview={loadingProductReview}
+							userInfo={userInfo}
+							submitHandler={submitHandler}
+							rating={rating}
+							setRating={setRating}
+							comment={comment}
+							setComment={setComment}
+							product={product}
+						/>
 					</div>
 				</>
 			)}

@@ -1,14 +1,24 @@
 import path from 'path';
 import express from 'express';
 import multer from 'multer';
+import fs from 'fs';
 
 const router = express.Router();
 
-//Configure storage settings for uploaded files
+// Ensure uploads directory exists
+const __dirname = path.resolve();
+const uploadDir = path.join(__dirname, 'backend/uploads');
+
+// Create directory if it doesn't exist
+if (!fs.existsSync(uploadDir)) {
+	fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure storage settings for uploaded files
 const storage = multer.diskStorage({
-	//Define files store destination
+	// Define files store destination
 	destination: (req, file, cb) => {
-		cb(null, 'uploads/');
+		cb(null, uploadDir);
 	},
 	// Define how files should be named
 	filename: (req, file, cb) => {
@@ -46,7 +56,7 @@ router.post('/', (req, res) => {
 		} else if (req.file) {
 			res.status(200).send({
 				message: 'Image uploaded successfully',
-				image: `/uploads/${req.file.filename}`, // Fix path
+				image: `/uploads/${req.file.filename}`,
 			});
 		} else {
 			res.status(400).send({ message: 'No image file provided' });

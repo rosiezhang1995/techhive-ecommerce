@@ -24,7 +24,7 @@ const ProductCard = ({ p }) => {
 					<div className="relative h-[300px] overflow-hidden">
 						<img
 							className="w-full h-full object-cover rounded-t-lg hover:opacity-90 transition-opacity"
-							src={p.image}
+							src={`${import.meta.env.VITE_API_URL}${p.image}`}
 							alt={p.name}
 						/>
 						<span

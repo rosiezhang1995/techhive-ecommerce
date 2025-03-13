@@ -91,7 +91,7 @@ const ProductList = () => {
 					{imageUrl && (
 						<div className="text-center mb-8">
 							<img
-								src={imageUrl}
+								src={`${import.meta.env.VITE_API_URL}${imageUrl}`}
 								alt="product"
 								className="block mx-auto max-h-[200px]"
 							/>
