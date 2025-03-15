@@ -1,22 +1,19 @@
-// packages
-import path from 'path';
+// Packages
 import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
-// utiles
+// Utilities & Routes
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js'; // Cloudinary Uploads
 import orderRoutes from './routes/orderRoutes.js';
 
 dotenv.config();
-
 const port = process.env.PORT || 5001;
-
 connectDB();
 
 const app = express();
@@ -34,24 +31,33 @@ app.use(
 	})
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+	if (req.originalUrl === '/api/upload') {
+		next(); // Skip express.json() for uploads
+	} else {
+		express.json({ limit: '10mb' })(req, res, next);
+	}
+});
+
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/category', categoryRoutes);
+app.use('/api/products', (req, res, next) => {
+	if (req.body && !req.fields) {
+		req.fields = req.body;
+	}
+	next();
+});
 app.use('/api/products', productRoutes);
-app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/upload', uploadRoutes); // Excluded from JSON parsing
 
+// PayPal Config
 app.get('/api/config/paypal', (req, res) => {
 	res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
 
-// Serve uploaded images
-const __dirname = path.resolve();
-// Set up static file serving for the uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'backend/uploads')));
-
-app.listen(port, () => console.log(`server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));

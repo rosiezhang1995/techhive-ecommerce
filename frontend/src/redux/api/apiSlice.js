@@ -4,6 +4,11 @@ import { BASE_URL } from '../constants.js';
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_URL,
 	credentials: 'include',
+	prepareHeaders: (headers) => {
+		headers.set('Content-Type', 'application/json');
+		headers.set('Accept', 'application/json');
+		return headers;
+	},
 });
 
 export const apiSlice = createApi({

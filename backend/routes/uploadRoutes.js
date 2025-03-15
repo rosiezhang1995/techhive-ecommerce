@@ -1,67 +1,46 @@
-import path from 'path';
 import express from 'express';
 import multer from 'multer';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const __dirname = path.resolve();
-const uploadDir = path.join(__dirname, 'backend/uploads');
+// Configure Cloudinary
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Create directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-	fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure storage settings for uploaded files
-const storage = multer.diskStorage({
-	// Define files store destination
-	destination: (req, file, cb) => {
-		cb(null, uploadDir);
-	},
-	// Define how files should be named
-	filename: (req, file, cb) => {
-		const extname = path.extname(file.originalname); // Get file extension
-		// Create unique filename: fieldname + timestamp + original extension
-		cb(null, `${file.fieldname}-${Date.now()}${extname}`);
+// Configure Multer Storage for Cloudinary
+const storage = new CloudinaryStorage({
+	cloudinary: cloudinary,
+	params: {
+		folder: 'ecommerce_uploads',
+		allowed_formats: ['jpg', 'png', 'webp', 'jpeg'],
 	},
 });
 
-// File filter for accepting certain image types
-const fileFilter = (req, file, cb) => {
-	// Allow jpg, jpeg, png, webp
-	const filetypes = /jpe?g|png|webp/;
-	const mimetypes = /image\/jpe?g|image\/png|image\/webp/;
-
-	const extname = path.extname(file.originalname).toLowerCase();
-	const mimetype = file.mimetype;
-
-	// Check if the file matches allowed types
-	if (filetypes.test(extname) && mimetypes.test(mimetype)) {
-		cb(null, true); // Accept the file
-	} else {
-		cb(new Error('Images only'), false); // Reject the file
-	}
-};
-
-const upload = multer({ storage, fileFilter });
-const uploadSingleImage = upload.single('image');
+const upload = multer({ storage });
 
 // POST route for handling image uploads
-router.post('/', (req, res) => {
-	uploadSingleImage(req, res, (err) => {
-		if (err) {
-			res.status(400).send({ message: err.message });
-		} else if (req.file) {
-			res.status(200).send({
-				message: 'Image uploaded successfully',
-				image: `/uploads/${req.file.filename}`,
-			});
-		} else {
-			res.status(400).send({ message: 'No image file provided' });
+router.post('/', upload.single('image'), (req, res) => {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ message: 'No image file provided' });
 		}
-	});
+		res.status(200).json({
+			message: 'Image uploaded successfully',
+			imageUrl: req.file.path,
+		});
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: 'Image upload failed', error: error.message });
+	}
 });
 
 export default router;

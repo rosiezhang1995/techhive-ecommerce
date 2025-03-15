@@ -5,6 +5,7 @@ import {
 	useUploadProductImageMutation,
 } from '../../redux/api/productApiSlice';
 import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
+import { UPLOAD_URL } from '../../redux/constants';
 import { toast } from 'react-toastify';
 import AdminMenu from './AdminMenu';
 
@@ -24,62 +25,72 @@ const ProductList = () => {
 	const [createProduct] = useCreateProductMutation();
 	const { data: categories } = useFetchCategoriesQuery();
 
+	const uploadFileHandler = async (e) => {
+		const file = e.target.files[0];
+
+		if (!file) {
+			toast.error('Please select a file.');
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('image', file);
+
+		try {
+			const res = await fetch(UPLOAD_URL, {
+				method: 'POST',
+				body: formData,
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.message || 'Upload failed.');
+			}
+
+			toast.success(data.message);
+			setImage(data.imageUrl);
+			setImageUrl(data.imageUrl);
+		} catch (error) {
+			toast.error(error.message || 'Upload failed.');
+		}
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
+		// Validation checks
 		if (!category) {
 			toast.error('Please select a category');
 			return;
 		}
 
-		try {
-			const productData = new FormData();
-			productData.append('image', image);
-			productData.append('name', name);
-			productData.append('description', description);
-			productData.append('price', price);
-			productData.append('category', category);
-			productData.append('quantity', quantity);
-			productData.append('brand', brand);
-			productData.append('countInStock', stock);
-
-			const response = await createProduct(productData);
-
-			if (response.error) {
-				// Check if there's a specific error message from the API
-				const errorMessage =
-					response.error?.data?.error ||
-					'Product create failed. Please try again.';
-				toast.error(errorMessage);
-			} else {
-				toast.success(`${response.data.name} is created`);
-				navigate('/');
-			}
-		} catch (error) {
-			console.error(error);
-			// Display specific error message if available
-			const errorMessage =
-				error.data?.error ||
-				error.message ||
-				'Product create failed. Please try again.';
-			toast.error(errorMessage);
+		if (!imageUrl) {
+			toast.error('Please upload an image first');
+			return;
 		}
-	};
-
-	const uploadFileHandler = async (e) => {
-		const formData = new FormData();
-		formData.append('image', e.target.files[0]);
 
 		try {
-			const res = await uploadProductImage(formData).unwrap();
-			toast.success(res.message);
-			setImage(res.image);
-			setImageUrl(res.image);
+			const productData = {
+				name,
+				description,
+				price: parseFloat(price),
+				category,
+				quantity: parseInt(quantity, 10),
+				brand,
+				countInStock: parseInt(stock, 10),
+				image: imageUrl,
+			};
+
+			const response = await createProduct(productData).unwrap();
+			toast.success(`${response.name} is created`);
+			navigate('/admin/productlist');
 		} catch (error) {
-			toast.error(error?.data?.message || error.error);
+			toast.error(
+				error?.data?.message || 'Product creation failed. Please try again.'
+			);
 		}
 	};
-
 	return (
 		<div className="container xl:mx-[9rem] sm:mx-[0]">
 			<div className="flex flex-col md:flex-row">
@@ -91,7 +102,7 @@ const ProductList = () => {
 					{imageUrl && (
 						<div className="text-center mb-8">
 							<img
-								src={`${import.meta.env.VITE_API_URL}${imageUrl}`}
+								src={imageUrl}
 								alt="product"
 								className="block mx-auto max-h-[200px]"
 							/>
@@ -197,6 +208,7 @@ const ProductList = () => {
 						{/* Submit button */}
 						<div className="flex justify-end mt-5">
 							<button
+								type="submit"
 								onClick={handleSubmit}
 								className="py-4 px-10 mt-5 rounded-lg text-lg font-bold bg-pink-600 hover:bg-pink-700 transition-colors w-full md:w-auto"
 							>

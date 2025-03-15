@@ -34,7 +34,7 @@ const ProductCarousel = () => {
 						{products.map(({ image, _id, name }) => (
 							<div key={_id}>
 								<img
-									src={`${import.meta.env.VITE_API_URL}${image}`}
+									src={image}
 									alt={name}
 									className="w-full rounded-lg object-cover h-[25rem]"
 								/>

@@ -78,7 +78,7 @@ const ProductDetails = () => {
 					<div className="flex flex-row relative items-between mt-8 ml-[10rem]">
 						<div className="relative">
 							<img
-								src={`${import.meta.env.VITE_API_URL}${product.image}`}
+								src={product.image}
 								alt={product.name}
 								className="w-full h-full object-cover xl:w-[50rem] lg:w-[45rem] md:w-[30rem] sm:w-[20rem]"
 							/>

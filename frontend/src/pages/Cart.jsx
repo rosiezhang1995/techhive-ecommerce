@@ -58,7 +58,7 @@ const Cart = () => {
 										<div className="w-16 h-16 flex-shrink-0">
 											<Link to={`/product/${item._id}`}>
 												<img
-													src={`${import.meta.env.VITE_API_URL}${item.image}`}
+													src={item.image}
 													alt={item.name}
 													className="w-full h-full object-cover rounded"
 												/>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { UPLOAD_URL } from '../../redux/constants';
 import AdminMenu from './AdminMenu';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -53,14 +54,31 @@ const ProductUpdate = () => {
 
 	// Handle image upload
 	const uploadFileHandler = async (e) => {
+		const file = e.target.files[0];
+
+		if (!file) {
+			toast.error('Please select a file.');
+			return;
+		}
+
 		const formData = new FormData();
-		formData.append('image', e.target.files[0]);
+		formData.append('image', file);
+
 		try {
-			const res = await uploadProductImage(formData).unwrap();
-			toast.success('Item added successfully');
-			setImage(res.image);
+			const res = await fetch(UPLOAD_URL, {
+				method: 'POST',
+				body: formData,
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.message || 'Upload failed.');
+			}
+			toast.success(data.message);
+			setImage(data.imageUrl);
 		} catch (error) {
-			toast.success('Item added successfully');
+			toast.error(error.message || 'Upload failed.');
 		}
 	};
 
@@ -68,32 +86,32 @@ const ProductUpdate = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const formData = new FormData();
-			formData.append('image', image);
-			formData.append('name', name);
-			formData.append('description', description);
-			formData.append('price', price);
-			formData.append('category', category);
-			formData.append('quantity', quantity);
-			formData.append('brand', brand);
-			formData.append('countInStock', stock);
+			const productData = {
+				name,
+				description,
+				price: parseFloat(price),
+				category,
+				quantity: parseInt(quantity, 10),
+				brand,
+				countInStock: parseInt(stock, 10),
+				image,
+			};
 
-			// Update product using the RTK Query mutation
-			const { data } = await updateProduct({ productId: params._id, formData });
+			const response = await updateProduct({
+				productId: params._id,
+				productData,
+			}).unwrap();
 
-			if (data.error) {
-				toast.error(data.error, {});
-			} else {
-				toast.success(`Product successfully updated`);
-				navigate('/admin/allproductslist');
-			}
+			toast.success(`Product successfully updated`);
+			navigate('/admin/allproductslist');
 		} catch (error) {
-			console.error(error);
-			toast.error('Product update failed. Try again.');
+			toast.error(
+				error?.data?.message ||
+					error?.data?.error ||
+					'Product update failed. Try again.'
+			);
 		}
 	};
-
-	// Handle product deletion
 	const handleDelete = async () => {
 		try {
 			let answer = window.confirm(
@@ -101,11 +119,10 @@ const ProductUpdate = () => {
 			);
 			if (!answer) return;
 
-			const { data } = await deleteProduct(params._id);
-			toast.success(`"${data.name}" is deleted`);
+			const response = await deleteProduct(params._id).unwrap();
+			toast.success(`"${response.name}" is deleted`);
 			navigate('/admin/allproductslist');
-		} catch (err) {
-			console.log(err);
+		} catch (error) {
 			toast.error('Delete failed. Try again.');
 		}
 	};
@@ -120,7 +137,7 @@ const ProductUpdate = () => {
 					{image && (
 						<div className="text-center">
 							<img
-								src={`${import.meta.env.VITE_API_URL}${image}`}
+								src={image}
 								alt="product"
 								className="block mx-auto max-h-[200px]"
 							/>
@@ -130,7 +147,7 @@ const ProductUpdate = () => {
 					{/* Upload Input */}
 					<div className="mb-3">
 						<label className="border text-white px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11">
-							{image ? image.name : 'Upload Image'}
+							{image ? 'Change Image' : 'Upload Image'}
 							<input
 								type="file"
 								name="image"

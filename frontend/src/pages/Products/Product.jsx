@@ -11,7 +11,7 @@ const Product = ({ product }) => {
 			<div className="relative h-[300px]">
 				<Link to={`/product/${product._id}`}>
 					<img
-						src={`${import.meta.env.VITE_API_URL}${product.image}`}
+						src={product.image}
 						alt={product.name}
 						className="w-full h-full object-cover rounded hover:opacity-90 transition-opacity"
 					/>

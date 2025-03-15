@@ -25,15 +25,15 @@ export const productApiSlice = apiSlice.injectEndpoints({
 			],
 		}),
 
-    // Fetch product by category
-    getProductsByCategory: builder.query({
-      query: ({ category, excludeId }) => ({
-        url: `${PRODUCT_URL}/category/${category}`,
-        params: { excludeId }, // exclude current product
-      }),
-      keepUnusedDataFor: 5,
-      providesTags: ['Products'],
-    }),
+		// Fetch product by category
+		getProductsByCategory: builder.query({
+			query: ({ category, excludeId }) => ({
+				url: `${PRODUCT_URL}/category/${category}`,
+				params: { excludeId }, // exclude current product
+			}),
+			keepUnusedDataFor: 5,
+			providesTags: ['Products'],
+		}),
 
 		//Fetch all products
 		allProducts: builder.query({
@@ -64,10 +64,10 @@ export const productApiSlice = apiSlice.injectEndpoints({
 
 		// Update an existing product
 		updateProduct: builder.mutation({
-			query: ({ productId, formData }) => ({
+			query: ({ productId, productData }) => ({
 				url: `${PRODUCT_URL}/${productId}`,
 				method: 'PUT',
-				body: formData,
+				body: productData,
 			}),
 			invalidatesTags: (result, error, { productId }) => [
 				{ type: 'Product', id: productId },
@@ -133,7 +133,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
 export const {
 	useGetProductsQuery,
 	useGetProductByIdQuery,
-  useGetProductsByCategoryQuery,
+	useGetProductsByCategoryQuery,
 	useAllProductsQuery,
 	useGetProductDetailsQuery,
 	useCreateProductMutation,
