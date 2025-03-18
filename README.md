@@ -1,6 +1,9 @@
 # TechHive Web Application
 An online store for cutting-edge **electronics** and **smart home devices**. 
 
+## 🎥 Demo
+Check out the live demo: [Live Demo](https://techhive-ecommerce-platform.onrender.com/) 
+
 ## 🚀 Features
 ### User Features
 - Browse & Search Products with filtering
