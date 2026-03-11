@@ -14,9 +14,15 @@ import orderRoutes from './routes/orderRoutes.js';
 
 dotenv.config();
 const port = process.env.PORT;
-connectDB();
+
+// Do not connect database in test environment
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 const app = express();
+// Export this app instance for test use
+export default app;
 
 const allowedOrigins = [
 	'https://techhive-ecommerce-platform.onrender.com',
@@ -65,5 +71,16 @@ app.get('/health',(req,res)=>{
 	res.status(200).send('OK');
 });
 
-// Start server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// Start the server only when this file is run directly.
+if (process.env.NODE_ENV !== 'test') {
+	app.listen(port, () => console.log(`Server running on port ${port}`)); // eslint-disable-line no-console
+}
+
+// error handler
+app.use((err, req, res, _next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack
+  });
+});
